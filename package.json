@@ -4,7 +4,8 @@
   "description": "Chrome/Edge extension that exports filtered GitHub issue lists to Excel-ready CSV.",
   "private": true,
   "scripts": {
-    "build": "tsc && node -e \"require('fs').copyFileSync('manifest.json','dist/manifest.json')\"",
+    "build": "tsc && node scripts/assets.js",
+    "icons": "node scripts/gen-icons.js",
     "test": "npm run build && node dist/test.js",
     "watch": "tsc --watch"
   },

@@ -32,6 +32,15 @@ function ensureButton(): void {
 setInterval(ensureButton, 1000);
 ensureButton();
 
+// Toolbar icon click, forwarded by background.ts.
+chrome.runtime.onMessage.addListener((msg: { type?: string }) => {
+  if (msg && msg.type === "export") {
+    const b = document.getElementById(BTN_ID) as HTMLButtonElement | null;
+    if (b) run(b);
+    else alert("Open a GitHub issue or pull request list first.");
+  }
+});
+
 function repoSlug(): string | null {
   const m = location.pathname.match(/^\/([^/]+\/[^/]+)\//);
   return m ? m[1] : null;
