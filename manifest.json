@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "GitHub Issues -> CSV",
+  "version": "1.0.0",
+  "description": "Export the currently filtered GitHub issue list to Excel-friendly CSV.",
+  "permissions": ["storage"],
+  "host_permissions": ["https://api.github.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*"],
+      "js": ["csv.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
