@@ -102,14 +102,43 @@ Ready to submit:
 - [x] No remotely hosted code; everything ships in the package
 - [x] Privacy policy -- [PRIVACY.md](PRIVACY.md)
 - [x] Permission justification text -- [PERMISSIONS.md](PERMISSIONS.md)
+- [x] Screenshot at 1280x800 -- `store/screenshot-1280x800.png`
 
 Still needed at submission time:
 
 - [ ] A Microsoft Partner Center developer account
-- [ ] At least one screenshot, 1280x800 or 640x480 (a capture of the button on a
-      real issue list is enough)
 
 Review typically takes 1-3 business days, longer for a first submission.
+
+### Listing assets
+
+`store/` holds material for the listing only; none of it ships in the extension.
+
+    store/screenshot-1280x800.png  submit this one
+    store/screenshot-source.png    raw capture it was derived from
+    icons/icon-300.png             store logo
+
+Edge accepts screenshots at exactly 1280x800 or 640x480. The raw capture was
+1892x965, so it is scaled to fit and centred on a `#0d1117` canvas, which is
+GitHub's dark background and so reads as intentional rather than letterboxed.
+To redo it after a fresh capture, on Windows:
+
+```powershell
+Add-Type -AssemblyName System.Drawing
+$src = [System.Drawing.Image]::FromFile('store\screenshot-source.png')
+$canvasW = 1280; $canvasH = 800
+$scale = [Math]::Min($canvasW / $src.Width, $canvasH / $src.Height)
+$drawW = [int]($src.Width * $scale); $drawH = [int]($src.Height * $scale)
+$bmp = New-Object System.Drawing.Bitmap($canvasW, $canvasH)
+$g = [System.Drawing.Graphics]::FromImage($bmp)
+$g.Clear([System.Drawing.ColorTranslator]::FromHtml('#0d1117'))
+$g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+$g.DrawImage($src, [int](($canvasW-$drawW)/2), [int](($canvasH-$drawH)/2), $drawW, $drawH)
+$g.Dispose(); $bmp.Save('store\screenshot-1280x800.png'); $bmp.Dispose(); $src.Dispose()
+```
+
+Note `$h` would collide with `$canvasH` -- PowerShell variables are
+case-insensitive, so the names above are deliberately distinct.
 
 ### If IT manages the machines
 
