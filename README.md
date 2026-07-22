@@ -4,12 +4,28 @@ Chrome/Edge extension. Adds an **Export CSV** button to GitHub issue and PR list
 pages. Exports whatever the current filter shows, as UTF-8 CSV that Excel opens
 cleanly.
 
+## Build
+
+Written in TypeScript, compiled with `tsc` alone -- no bundler.
+
+    npm install
+    npm run build
+
+Output lands in `dist/`, which is the folder the browser loads. `npm run watch`
+recompiles on save.
+
 ## Install
 
-1. `chrome://extensions` -> enable **Developer mode**
-2. **Load unpacked** -> select this folder
-3. Open any GitHub issues page, click **Export CSV** (bottom right)
-4. First click asks for a personal access token, stored in extension local storage
+1. `npm install && npm run build`
+2. `edge://extensions` (or `chrome://extensions`) -> enable **Developer mode**
+3. **Load unpacked** -> select the **`dist`** folder, not the repo root
+4. Open any GitHub issues page and **reload the tab** -- content scripts do not
+   inject into tabs that were already open
+5. Click **Export CSV**, bottom right
+6. First click asks for a personal access token, stored in extension local storage
+
+The extension has no toolbar popup, so its entry in the extensions menu is greyed
+out. That is expected; the button lives on the GitHub page itself.
 
 Token scopes: classic PAT with `repo`, or fine-grained PAT with **Issues: read**
 on the target repos. Private repos need it; public repos still need it because
@@ -28,9 +44,20 @@ created_at, updated_at, closed_at, url, body
 
 ## Test
 
-    node test.js
+    npm test
 
-Covers CSV quoting, embedded newlines, and Excel formula-injection neutralising.
+Builds, then covers CSV quoting, embedded newlines, and Excel formula-injection
+neutralising.
+
+## Layout
+
+    src/csv.ts      pure CSV formatting, no DOM or chrome APIs
+    src/content.ts  button injection, GitHub API paging, download
+    src/test.ts     self-check for the escaping logic
+    manifest.json   copied into dist/ by the build
+
+`csv.ts` and `content.ts` deliberately have no imports or exports. Content scripts
+are classic scripts, so `tsc` emits them as plain globals sharing one scope.
 
 ## Limits
 
