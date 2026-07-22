@@ -114,9 +114,15 @@ Review typically takes 1-3 business days, longer for a first submission.
 
 `store/` holds material for the listing only; none of it ships in the extension.
 
+    store/LISTING.md               description, search terms, category
     store/screenshot-1280x800.png  submit this one
     store/screenshot-source.png    raw capture it was derived from
+    store/promo-440x280.png        small promotional tile
+    store/promo-1400x560.png       large promotional tile
     icons/icon-300.png             store logo
+
+The tiles are regenerated with `npm run tiles` (Windows only -- see
+[store/LISTING.md](store/LISTING.md)).
 
 Edge accepts screenshots at exactly 1280x800 or 640x480. The raw capture was
 1892x965, so it is scaled to fit and centred on a `#0d1117` canvas, which is
