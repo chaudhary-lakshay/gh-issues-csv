@@ -1,14 +1,15 @@
 // GitHub Issues -> CSV. Injects a floating Export button on issue-list pages.
+// COLUMNS / cell / toCsv / Issue come from csv.ts, loaded first by the manifest.
 
 const BTN_ID = "gh-csv-export-btn";
 
 // ponytail: floating button instead of splicing into GitHub's toolbar DOM.
 // GitHub reshuffles that markup constantly; a fixed-position button never breaks.
-function isIssueList() {
+function isIssueList(): boolean {
   return /^\/([^/]+\/[^/]+\/(issues|pulls)|issues|pulls)\/?$/.test(location.pathname);
 }
 
-function ensureButton() {
+function ensureButton(): void {
   if (!isIssueList()) {
     const old = document.getElementById(BTN_ID);
     if (old) old.remove();
@@ -31,21 +32,21 @@ function ensureButton() {
 setInterval(ensureButton, 1000);
 ensureButton();
 
-function repoSlug() {
+function repoSlug(): string | null {
   const m = location.pathname.match(/^\/([^/]+\/[^/]+)\//);
   return m ? m[1] : null;
 }
 
-function buildQuery() {
+function buildQuery(): string {
   const q = new URLSearchParams(location.search).get("q") || "is:issue is:open";
   const repo = repoSlug();
   if (repo && !/\brepo:/.test(q)) return `repo:${repo} ${q}`;
   return q;
 }
 
-async function getToken() {
+async function getToken(): Promise<string | null> {
   const { token } = await chrome.storage.local.get("token");
-  if (token) return token;
+  if (token) return token as string;
   const t = prompt(
     "GitHub personal access token (classic: repo scope, or fine-grained: Issues read).\nStored locally in this extension only."
   );
@@ -54,8 +55,17 @@ async function getToken() {
   return t.trim();
 }
 
-async function fetchAll(q, token, onProgress) {
-  const out = [];
+interface SearchResponse {
+  total_count: number;
+  items: Issue[];
+}
+
+async function fetchAll(
+  q: string,
+  token: string,
+  onProgress: (loaded: number, total: number) => void
+): Promise<Issue[]> {
+  const out: Issue[] = [];
   // ponytail: Search API caps at 1000 results. Enough for a filtered QA sweep.
   // Past that, switch to GraphQL search with cursor pagination.
   for (let page = 1; page <= 10; page++) {
@@ -75,7 +85,7 @@ async function fetchAll(q, token, onProgress) {
       const body = await res.text();
       throw new Error(`GitHub API ${res.status}: ${body.slice(0, 300)}`);
     }
-    const data = await res.json();
+    const data = (await res.json()) as SearchResponse;
     out.push(...data.items);
     onProgress(out.length, data.total_count);
     if (data.items.length < 100 || out.length >= data.total_count) break;
@@ -83,9 +93,7 @@ async function fetchAll(q, token, onProgress) {
   return out;
 }
 
-// COLUMNS / cell / toCsv come from csv.js, loaded first by the manifest.
-
-function download(csv, name) {
+function download(csv: string, name: string): void {
   const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
   const a = document.createElement("a");
   a.href = url;
@@ -96,8 +104,8 @@ function download(csv, name) {
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
-async function run(btn) {
-  const label = btn.textContent;
+async function run(btn: HTMLButtonElement): Promise<void> {
+  const label = btn.textContent || "Export CSV";
   btn.disabled = true;
   try {
     const token = await getToken();
@@ -115,8 +123,9 @@ async function run(btn) {
     const stamp = new Date().toISOString().slice(0, 10);
     download(toCsv(items), `${slug}-issues-${stamp}.csv`);
   } catch (e) {
-    if (String(e).includes("401")) await chrome.storage.local.remove("token");
-    alert("Export failed:\n" + e.message);
+    const err = e as Error;
+    if (String(err).includes("401")) await chrome.storage.local.remove("token");
+    alert("Export failed:\n" + err.message);
   } finally {
     btn.disabled = false;
     btn.textContent = label;

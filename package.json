@@ -1,0 +1,16 @@
+{
+  "name": "gh-issues-csv",
+  "version": "1.0.0",
+  "description": "Chrome/Edge extension that exports filtered GitHub issue lists to Excel-ready CSV.",
+  "private": true,
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').copyFileSync('manifest.json','dist/manifest.json')\"",
+    "test": "npm run build && node dist/test.js",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "@types/node": "^20.14.0",
+    "typescript": "^5.4.0"
+  }
+}

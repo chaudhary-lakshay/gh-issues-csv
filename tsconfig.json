@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM"],
+    // commonjs so the compiled test runs under plain node. csv.ts and content.ts
+    // have no imports/exports, so they still emit as classic scripts the way
+    // content scripts need.
+    "module": "commonjs",
+    "rootDir": "src",
+    "outDir": "dist",
+    "strict": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": false,
+    "types": ["chrome", "node"]
+  },
+  "include": ["src"]
+}

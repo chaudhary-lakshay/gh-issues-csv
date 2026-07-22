@@ -1,12 +1,15 @@
 // ponytail: one runnable check for the only non-trivial logic (CSV escaping).
-// Run: node test.js
-const fs = require("fs");
-const vm = require("vm");
-const assert = require("assert");
+// Run: npm test
+import * as fs from "fs";
+import * as vm from "vm";
+import * as assert from "assert";
 
-const ctx = { assert };
+// csv.js is a classic script with no exports, so load it through vm rather than
+// import -- same way the browser sees it.
+const ctx: { cell?: (v: unknown) => string; toCsv?: (i: any[]) => string } = {};
 vm.runInNewContext(fs.readFileSync(__dirname + "/csv.js", "utf8"), ctx);
-const { cell, toCsv } = ctx;
+const cell = ctx.cell!;
+const toCsv = ctx.toCsv!;
 
 // quoting
 assert.strictEqual(cell("plain"), '"plain"');
