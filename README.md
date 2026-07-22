@@ -38,8 +38,8 @@ recompiles on save.
 5. Click **Export CSV**, bottom right
 6. First click asks for a personal access token, stored in extension local storage
 
-The extension has no toolbar popup, so its entry in the extensions menu is greyed
-out. That is expected; the button lives on the GitHub page itself.
+Two ways to trigger an export: the green button on the page, or the toolbar icon
+(pin it from the extensions menu). Both do the same thing.
 
 Token scopes: classic PAT with `repo`, or fine-grained PAT with **Issues: read**
 on the target repos. Private repos need it; public repos still need it because
@@ -65,10 +65,13 @@ neutralising.
 
 ## Layout
 
-    src/csv.ts      pure CSV formatting, no DOM or chrome APIs
-    src/content.ts  button injection, GitHub API paging, download
-    src/test.ts     self-check for the escaping logic
-    manifest.json   copied into dist/ by the build
+    src/csv.ts         pure CSV formatting, no DOM or chrome APIs
+    src/content.ts     button injection, GitHub API paging, download
+    src/background.ts  service worker: toolbar click -> content script
+    src/test.ts        self-check for the escaping logic
+    scripts/gen-icons.js  draws icons/*.png from math (npm run icons)
+    scripts/assets.js     copies manifest + icons into dist/
+    icons/             icon-16/32/48/128 ship; icon-300 is the store logo
 
 `csv.ts` and `content.ts` deliberately have no imports or exports. Content scripts
 are classic scripts, so `tsc` emits them as plain globals sharing one scope.
@@ -82,19 +85,37 @@ so the manifest never drifts from the release.
     git tag v1.0.1
     git push origin v1.0.1
 
-## Roadmap
+## Publishing to the Edge Add-ons store
 
-To reach a real one-click install, in order:
+Publishing is what removes the Developer mode requirement and brings automatic
+updates. The account is free (unlike the Chrome Web Store's one-time $5 fee).
 
-1. **Icons.** A 128x128 PNG (plus 48 and 16) in `manifest.json` under `icons`.
-   Required by both stores, and without it the browser shows a grey placeholder.
-2. **Edge Add-ons store.** Free developer account, ~1-3 business day review.
-   Gets QA a normal install with auto-updates and no Developer mode.
-   Chrome Web Store is the same process with a one-time $5 fee.
-3. **Enterprise force-install** (alternative to the store, if IT manages the
-   machines): host the packed `.crx` plus an update manifest internally and push
-   it via the `ExtensionInstallForcelist` group policy. No review, no dev mode,
-   but needs IT involvement.
+Package format is already correct: Edge wants a **ZIP of the unpacked extension
+with `manifest.json` at the root** -- exactly what the release workflow produces.
+No `.crx` involved.
+
+Ready to submit:
+
+- [x] Manifest V3, `manifest.json` at zip root
+- [x] Icons at 16 / 32 / 48 / 128
+- [x] Store logo, 300x300 -- `icons/icon-300.png`
+- [x] No remotely hosted code; everything ships in the package
+- [x] Privacy policy -- [PRIVACY.md](PRIVACY.md)
+- [x] Permission justification text -- [PERMISSIONS.md](PERMISSIONS.md)
+
+Still needed at submission time:
+
+- [ ] A Microsoft Partner Center developer account
+- [ ] At least one screenshot, 1280x800 or 640x480 (a capture of the button on a
+      real issue list is enough)
+
+Review typically takes 1-3 business days, longer for a first submission.
+
+### If IT manages the machines
+
+An alternative to the store entirely: host the packed `.crx` and an update
+manifest internally, then deploy via the `ExtensionInstallForcelist` group
+policy. No review and no Developer mode, but it needs IT involvement.
 
 ## Limits
 
