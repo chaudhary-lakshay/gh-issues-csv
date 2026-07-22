@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc && node scripts/assets.js",
     "icons": "node scripts/gen-icons.js",
+    "tiles": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/gen-tiles.ps1",
     "test": "npm run build && node dist/test.js",
     "watch": "tsc --watch"
   },
