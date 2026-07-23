@@ -160,3 +160,7 @@ policy. No review and no Developer mode, but it needs IT involvement.
 - Project v2 custom fields (Status, Sprint, custom selects) are not included --
   those need the GraphQL `ProjectV2` API, which is what fiedl/github-project-to-csv
   actually does.
+
+## Contributing
+
+Issues here are **first come, first merged**. Assignment is not reservation: if an issue is assigned to someone and you open a working PR first, yours is the one that gets merged. Commenting "I'd like to work on this" is welcome and I'll assign it, but it does not hold the issue against a PR that arrives sooner. If you want an issue, the reliable way to get it is to open the PR.
